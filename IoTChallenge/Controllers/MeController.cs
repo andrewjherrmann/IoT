@@ -14,7 +14,7 @@ using IoTChallenge.Models;
 
 namespace IoTChallenge.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class MeController : ApiController
     {
         private ApplicationUserManager _userManager;
@@ -44,7 +44,7 @@ namespace IoTChallenge.Controllers
         public GetViewModel Get()
         {
             var user = UserManager.FindById(User.Identity.GetUserId());
-            return new GetViewModel() { Hometown = user.Hometown };
+            return new GetViewModel() { Hometown = user?.Hometown };
         }
     }
 }
