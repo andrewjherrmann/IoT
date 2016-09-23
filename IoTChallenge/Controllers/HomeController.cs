@@ -12,5 +12,10 @@ namespace IoTChallenge.Controllers
         {
             return View();
         }
+
+        public ActionResult Defcon()
+        {
+            return View();
+        }
     }
 }
