@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "2016-09-26T02:33:04Z",
+    "version": "2016-09-26T03:09:41Z",
     "title": "Defcon Api"
   },
   "host": "alee1se82m.execute-api.us-west-2.amazonaws.com",
@@ -33,7 +33,6 @@
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "aws",
           "responses": {
             "default": {
               "statusCode": "200",
@@ -47,7 +46,8 @@
           },
           "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
           "passthroughBehavior": "never",
-          "httpMethod": "POST"
+          "httpMethod": "POST",
+          "type": "aws"
         }
       },
       "post": {
@@ -73,7 +73,6 @@
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "aws",
           "responses": {
             "default": {
               "statusCode": "200",
@@ -87,7 +86,8 @@
           },
           "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
           "passthroughBehavior": "when_no_templates",
-          "httpMethod": "POST"
+          "httpMethod": "POST",
+          "type": "aws"
         }
       }
     },
@@ -105,7 +105,6 @@
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "aws",
           "responses": {
             "default": {
               "statusCode": "200"
@@ -116,11 +115,12 @@
           },
           "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
           "passthroughBehavior": "when_no_templates",
-          "httpMethod": "POST"
+          "httpMethod": "POST",
+          "type": "aws"
         }
       }
     },
-    "/room/lower/{id}": {
+    "/room/lower": {
       "post": {
         "consumes": [
           "application/json"
@@ -128,43 +128,28 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "200 response",
-            "schema": {
-              "$ref": "#/definitions/Success"
-            }
-          },
-          "404": {
-            "description": "404 response",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "description": "200 response"
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "mock",
           "responses": {
             "default": {
               "statusCode": "200"
             }
           },
           "requestTemplates": {
-            "application/json": "{\"statusCode\": 200}"
+            "application/json": "#set($json = $input.json('$'))\n{\n\"bodyjson\" : $input.json('$'),\n\"operation\" : \"lower_defcon\"\n}"
           },
-          "passthroughBehavior": "when_no_match"
+          "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
+          "passthroughBehavior": "when_no_templates",
+          "httpMethod": "POST",
+          "type": "aws"
         }
       }
     },
-    "/room/raise/{id}": {
+    "/room/raise": {
       "post": {
         "consumes": [
           "application/json"
@@ -172,39 +157,24 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "200 response",
-            "schema": {
-              "$ref": "#/definitions/Success"
-            }
-          },
-          "404": {
-            "description": "404 response",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "description": "200 response"
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "mock",
           "responses": {
             "default": {
               "statusCode": "200"
             }
           },
           "requestTemplates": {
-            "application/json": "{\"statusCode\": 200}"
+            "application/json": "#set($json = $input.json('$'))\n{\n\"bodyjson\" : $input.json('$'),\n\"operation\" : \"raise_defcon\"\n}"
           },
-          "passthroughBehavior": "when_no_match"
+          "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
+          "passthroughBehavior": "when_no_templates",
+          "httpMethod": "POST",
+          "type": "aws"
         }
       }
     },
@@ -239,7 +209,6 @@
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "mock",
           "responses": {
             "default": {
               "statusCode": "200"
@@ -248,7 +217,8 @@
           "requestTemplates": {
             "application/json": "{\"statusCode\": 200}"
           },
-          "passthroughBehavior": "when_no_match"
+          "passthroughBehavior": "when_no_match",
+          "type": "mock"
         }
       }
     },
@@ -262,7 +232,6 @@
         ],
         "responses": {},
         "x-amazon-apigateway-integration": {
-          "type": "mock",
           "responses": {
             "default": {
               "statusCode": "200"
@@ -271,7 +240,8 @@
           "requestTemplates": {
             "application/json": "{\"statusCode\": 200}"
           },
-          "passthroughBehavior": "when_no_match"
+          "passthroughBehavior": "when_no_match",
+          "type": "mock"
         }
       },
       "delete": {
@@ -283,7 +253,6 @@
         ],
         "responses": {},
         "x-amazon-apigateway-integration": {
-          "type": "mock",
           "responses": {
             "default": {
               "statusCode": "200"
@@ -292,7 +261,8 @@
           "requestTemplates": {
             "application/json": "{\"statusCode\": 200}"
           },
-          "passthroughBehavior": "when_no_match"
+          "passthroughBehavior": "when_no_match",
+          "type": "mock"
         }
       }
     },
@@ -327,7 +297,6 @@
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "aws",
           "responses": {
             "default": {
               "statusCode": "200",
@@ -341,7 +310,8 @@
           },
           "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
           "passthroughBehavior": "when_no_templates",
-          "httpMethod": "POST"
+          "httpMethod": "POST",
+          "type": "aws"
         }
       },
       "delete": {
@@ -374,7 +344,6 @@
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "mock",
           "responses": {
             "default": {
               "statusCode": "200"
@@ -383,7 +352,8 @@
           "requestTemplates": {
             "application/json": "{\"statusCode\": 200}"
           },
-          "passthroughBehavior": "when_no_match"
+          "passthroughBehavior": "when_no_match",
+          "type": "mock"
         }
       }
     },
@@ -404,7 +374,6 @@
           }
         },
         "x-amazon-apigateway-integration": {
-          "type": "aws",
           "responses": {
             "default": {
               "statusCode": "200",
@@ -418,7 +387,8 @@
           },
           "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
           "passthroughBehavior": "when_no_templates",
-          "httpMethod": "POST"
+          "httpMethod": "POST",
+          "type": "aws"
         }
       }
     }
