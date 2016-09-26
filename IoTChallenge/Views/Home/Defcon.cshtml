@@ -1,18 +1,7 @@
-﻿@{
+﻿@model IoTChallenge.Models.RoomResponse
+@{
     ViewBag.Title = "Defcon";
 }
-<h2>Defcon</h2>
-<div class="container">
-    <input type="text" id="message" />
-    <input type="button" id="sendmessage" value="Send" />
-    <input type="hidden" id="displayname" />
-    <ul id="discussion"></ul>
-    <div>
-        <h3>Status List</h3>
-        <ul id="statuses"></ul>
-    </div>
-    
-</div>
 @section scripts {
     <!--Script references. -->
     <!--The jQuery library is required and is referenced by default in _Layout.cshtml. -->
@@ -36,14 +25,15 @@
                     + '</strong>: ' + htmlEncode(time) + '</li>');
             };
             // Get the user name and store it to prepend to messages.
-            $('#displayname').val(prompt('Enter your name:', ''));
+            //$('#displayname').val(prompt('Enter your name:', ''));
             // Set initial focus to message input box.
             $('#message').focus();
             // Start the connection.
             $.connection.hub.start().done(function () {
                 $('#sendmessage').click(function () {
                     // Call the Send method on the hub.
-                    defcon.server.send($('#displayname').val(), $('#message').val());
+                    //defcon.server.send($('#displayname').val(), $('#message').val());
+                    defcon.server.send('Test', $('#message').val());
                     // Clear text box and reset focus for next comment.
                     $('#message').val('').focus();
                 });
@@ -55,4 +45,38 @@
             return encodedValue;
         }
     </script>
+    <script type="text/javascript" src="@Url.Content("~/Scripts/app/DefconViewModel.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Scripts/knockout-2.3.0.js")"></script>
+    <script>
+        var data = @Html.Raw(Json.Encode(Model));
+        var vm = new DefconViewModel(data);
+
+        $(function() {
+            ko.applyBindings(vm);
+        });
+    </script>
 }
+<h2>Defcon</h2>
+<div class="container">
+    <input type="text" id="message" />
+    <input type="button" id="sendmessage" value="Send" />
+    <input type="hidden" id="displayname" />
+    <ul id="discussion"></ul>
+    <div>
+        <h3>Status List</h3>
+        <ul id="statuses"></ul>
+    </div>
+    
+    <ul id="rooms" data-bind="foreach: items">
+        <li>
+            Room Name: <span data-bind="text: name"></span><br />
+            Current Level: <span data-bind="text: current_level"></span><br />
+            <a data-bind="click: instantDeath">Instant Death</a>
+            <a data-bind="click: raise">Raise</a>
+            <a data-bind="click: lower">Lower</a>
+
+            <hr />
+        </li>
+    </ul>
+
+</div>

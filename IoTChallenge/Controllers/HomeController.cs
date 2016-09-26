@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Common;
+using IoTChallenge.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -15,7 +17,16 @@ namespace IoTChallenge.Controllers
 
         public ActionResult Defcon()
         {
-            return View();
+            var model = new DefconModel();
+            var results = model.GetRoomInfo();
+            return View(results);
         }
-    }
+
+        public JsonResult DefconLevel(DefconLevelChange defconLevelChange)
+        {
+            var model = new DefconModel();
+            var result = model.ChangeDefconLevel(defconLevelChange);
+            return new JsonResult() { Data = result };
+        }
+    }   
 }
