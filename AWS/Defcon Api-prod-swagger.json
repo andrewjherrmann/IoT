@@ -1,0 +1,540 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "2016-09-26T02:33:04Z",
+    "title": "Defcon Api"
+  },
+  "host": "alee1se82m.execute-api.us-west-2.amazonaws.com",
+  "basePath": "/prod",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/room": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Rooms"
+            }
+          },
+          "404": {
+            "description": "404 response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws",
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseTemplates": {
+                "application/json": "#set($inputRoot = $input.path('$'))\n{\n  \"offset\" : 0,\n  \"limit\" : $inputRoot.body.Count,\n  \"count\" : $inputRoot.body.Count,\n  \"items\" : [\n##TODO: Update this foreach loop to reference array from input json\n#foreach($elem in $inputRoot.body.Items)\n {\n \n    \"room_id\" : \"$elem.room_id\",\n    \"name\" : \"$elem.name\",\n    \"current_level\" : $elem.current_level,\n    \"configuration_last_updated\" : \"$elem.configuration_last_updated\",\n    \"level_last_updated\" : \"$elem.level_last_updated\",\n    \"level_last_updated_by\" : \"$elem.level_last_updated_by\",\n    \"level_auto_lower_time\" : $elem.level_auto_lower_time\n  } \n#if($foreach.hasNext),#end\n#end\n]\n}"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n##  This template will pass through all parameters including path, querystring, header, stage variables, and context through to the integration endpoint via the body/payload\n{\n\"body-json\" : $input.json('$'),\n\"operation\" : \"readall\"\n}\n"
+          },
+          "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
+          "passthroughBehavior": "never",
+          "httpMethod": "POST"
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "NewRoom",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NewRoom"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response"
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws",
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseTemplates": {
+                "application/json": "#set($inputRoot = $input.path('$'))\n#set($elem = $inputRoot.body.Items[0])\n{\n    \"room_id\" : \"$elem.room_id\",\n    \"name\" : \"$elem.name\",\n    \"current_level\" : $elem.current_level,\n    \"configuration_last_updated\" : \"$elem.configuration_last_updated\",\n    \"level_last_updated\" : \"$elem.level_last_updated\",\n    \"level_last_updated_by\" : \"$elem.level_last_updated_by\",\n    \"level_auto_lower_time\" : $elem.level_auto_lower_time\n}"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\n\"bodyjson\" : $input.json('$'),\n\"operation\" : \"add_room\"\n}"
+          },
+          "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
+          "passthroughBehavior": "when_no_templates",
+          "httpMethod": "POST"
+        }
+      }
+    },
+    "/room/instantdeath": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response"
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws",
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestTemplates": {
+            "application/json": "#set($json = $input.json('$'))\n{\n\"bodyjson\" : $input.json('$'),\n\"operation\" : \"instant_death\"\n}\n"
+          },
+          "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
+          "passthroughBehavior": "when_no_templates",
+          "httpMethod": "POST"
+        }
+      }
+    },
+    "/room/lower/{id}": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Success"
+            }
+          },
+          "404": {
+            "description": "404 response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/room/raise/{id}": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Success"
+            }
+          },
+          "404": {
+            "description": "404 response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/room/stats/{id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Stat"
+            }
+          },
+          "404": {
+            "description": "404 response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/room/subscription": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {},
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match"
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {},
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/room/{id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Room"
+            }
+          },
+          "404": {
+            "description": "404 response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws",
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseTemplates": {
+                "application/json": "#set($inputRoot = $input.path('$'))\n#set($elem = $inputRoot.body.Items[0])\n{\n    \"room_id\" : \"$elem.room_id\",\n    \"name\" : \"$elem.name\",\n    \"current_level\" : $elem.current_level,\n    \"configuration_last_updated\" : \"$elem.configuration_last_updated\",\n    \"level_last_updated\" : \"$elem.level_last_updated\",\n    \"level_last_updated_by\" : \"$elem.level_last_updated_by\",\n    \"level_auto_lower_time\" : $elem.level_auto_lower_time\n}"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n##  This template will pass through all parameters including path, querystring, header, stage variables, and context through to the integration endpoint via the body/payload\n#set($allParams = $input.params())\n{\n\"body-json\" : $input.json('$'),\n\"operation\": \"read\",\n\"id\": \"$input.params('id')\",\n\"stage\" : \"$context.stage\"\n}\n"
+          },
+          "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
+          "passthroughBehavior": "when_no_templates",
+          "httpMethod": "POST"
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Room"
+            }
+          },
+          "404": {
+            "description": "404 response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "mock",
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match"
+        }
+      }
+    },
+    "/roomstatus": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Success"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws",
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseTemplates": {
+                "text/plain": "#set($inputRoot = $input.path('$'))\n#foreach($elem in $inputRoot.body.Items)\n\"$elem.name is at defcon level $elem.current_level\"\n#if($foreach.hasNext)#end\n#end\n"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n##  This template will pass through all parameters including path, querystring, header, stage variables, and context through to the integration endpoint via the body/payload\n#set($allParams = $input.params())\n{\n    \"operation\" : \"readall\"\n}\n"
+          },
+          "uri": "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:867486598692:function:defcon_dal/invocations",
+          "passthroughBehavior": "when_no_templates",
+          "httpMethod": "POST"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Stat": {
+      "type": "object",
+      "properties": {
+        "room_id": {
+          "type": "number",
+          "description": "Unique identifier for a room."
+        },
+        "number_of_clicks": {
+          "type": "number",
+          "description": "Number of clicks for the room"
+        }
+      }
+    },
+    "NewRoom": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the room."
+        },
+        "associate_device": {
+          "type": "string",
+          "description": "IoT button serial number"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        }
+      }
+    },
+    "Room": {
+      "type": "object",
+      "properties": {
+        "room_id": {
+          "type": "number",
+          "description": "Unique identifier for a room."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the room."
+        },
+        "associate_device": {
+          "type": "string",
+          "description": "IoT button serial number"
+        },
+        "current_level": {
+          "type": "number",
+          "description": "Current defcon level of the room"
+        },
+        "configuration_last_updated": {
+          "type": "string",
+          "description": "Datetime configuration was last updated."
+        },
+        "level_last_updated": {
+          "type": "string",
+          "description": "Capacity of product. For example, 4 people."
+        },
+        "level_last_updated_by": {
+          "type": "string",
+          "description": "Capacity of product. For example, 4 people."
+        },
+        "level_auto_lower_time": {
+          "type": "number",
+          "description": "Number of seconds until the defcon level is automatically lowered"
+        }
+      }
+    },
+    "Success": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Rooms": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Position in pagination."
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of items to retrieve (100 max)."
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of items available."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Room"
+          }
+        }
+      }
+    }
+  }
+}
