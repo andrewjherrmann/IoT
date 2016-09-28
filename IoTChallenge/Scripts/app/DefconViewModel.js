@@ -9,6 +9,24 @@ function DefconItemModel(data){
     self.level_last_updated = ko.observable(data.level_last_updated);
     self.level_last_updated_by = ko.observable(data.level_last_updated_by);
     self.level_auto_lower_time = ko.observable(data.level_auto_lower_time);
+
+    self.progress_style = ko.computed(function () {
+        switch (self.current_level()) {
+            case 1:
+                return "progress-bar progress-bar-danger width100";
+            case 2:
+                return "progress-bar progress-bar-warning width80";
+            case 3:
+                return "progress-bar width60";
+            case 4:
+                return "progress-bar progress-bar-info width40";
+            case 5:
+                return "progress-bar progress-bar-success width20";
+            default:
+                return "progress-bar progress-bar-success";
+        }
+    });
+
     self.raise = function () {
         var requestData = { room_id: self.room_id(), request_type: "raise" };
         $.post('DefconLevel', ko.toJSON(requestData), function (data) {
@@ -25,9 +43,12 @@ function DefconItemModel(data){
 
     self.instantDeath = function () {
         var requestData = { room_id: self.room_id(), request_type: "instantdeath" };
-        $.post('DefconLevel', ko.toJSON(requestData), function (data) {
-            self.current_level(data.current_level);
-        });
+        if (confirm("Are you sure you want to set the level to instant death?  If so, it was really nice knowing you...")) {
+            $.post('DefconLevel', ko.toJSON(requestData), function (data) {
+                self.current_level(data.current_level);
+            });
+
+        }
     };
 }
 

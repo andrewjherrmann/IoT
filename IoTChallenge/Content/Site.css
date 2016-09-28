@@ -34,3 +34,23 @@ textarea {
         padding: 10px 15px;
     }
 }
+
+.width20{
+    width: 20%;
+}
+
+.width40{
+    width: 40%;
+}
+
+.width60{
+    width: 60%;
+}
+
+.width80{
+    width: 80%;
+}
+
+.width100{
+    width: 100%;
+}
