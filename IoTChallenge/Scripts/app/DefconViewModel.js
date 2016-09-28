@@ -1,7 +1,8 @@
 ﻿$.ajaxSetup({ contentType: "application/json; charset=utf-8" });
 
-function DefconItemModel(data){
+function DefconItemModel(data, defcon){
     var self = this;
+    self.defcon = defcon;
     self.room_id = ko.observable(data.room_id);
     self.name = ko.observable(data.name);
     self.current_level = ko.observable(data.current_level);
@@ -28,48 +29,77 @@ function DefconItemModel(data){
     });
 
     self.raise = function () {
-        var requestData = { room_id: self.room_id(), request_type: "raise" };
-        $.post('DefconLevel', ko.toJSON(requestData), function (data) {
-            self.current_level(data.current_level);
-        });
+        self.defcon.server.defconLevel(self.room_id(), "raise");
     };
 
     self.lower = function () {
-        var requestData = { room_id: self.room_id(), request_type: "lower" };
-        $.post('DefconLevel', ko.toJSON(requestData), function (data) {
-            self.current_level(data.current_level);
-        });
+        self.defcon.server.defconLevel(self.room_id(), "lower");
     };
 
     self.instantDeath = function () {
-        var requestData = { room_id: self.room_id(), request_type: "instantdeath" };
         if (confirm("Are you sure you want to set the level to instant death?  If so, it was really nice knowing you...")) {
-            $.post('DefconLevel', ko.toJSON(requestData), function (data) {
-                self.current_level(data.current_level);
-            });
-
+            self.defcon.server.defconLevel(self.room_id(), "instantdeath");
         }
     };
 }
 
 function DefconViewModel(data) {
     var self = this;
+    self.defcon = $.connection.defconHub;
     self.offset = ko.observable();
     self.limit = ko.observable();
     self.count = ko.observable();
     self.items = ko.observableArray();
+    self.messages = ko.observableArray();
+    self.displayName = ko.observable();
+    self.message = ko.observable("");
 
     self.Load = function (data) {
         self.offset(data.offset);
         self.limit(data.limit);
         self.count(data.count);
         data.items.forEach(function (c) {
-            self.items.push(new DefconItemModel(c));
+            self.items.push(new DefconItemModel(c, self.defcon));
         });
     }
 
+    // Create a function that the hub can call back to display messages.
+    self.defcon.client.addNewMessageToPage = function (name, message) {
+        self.messages.push({ "name": htmlEncode(name), "message": htmlEncode(message) });
+    };
+
+    self.defcon.client.publishStatusToPage = function (data) {
+        var match = ko.utils.arrayFirst(self.items(), function (item) {
+            if (data.room_id === item.room_id()) {
+                item.current_level(data.current_level);
+            }
+        });
+
+    };
+
+    self.sendMessage = function () {
+        // Call the Send method on the hub.
+        self.defcon.server.send(self.displayName(), self.message());
+        self.message("");
+        // Clear text box and reset focus for next comment.
+        $('#message').focus();
+    };
+
+    // Start the connection.
+    $.connection.hub.start();
+
+    // This optional function html-encodes messages for display in the page.
+    function htmlEncode(value) {
+        var encodedValue = $('<div />').text(value).html();
+        return encodedValue;
+    }
+
+    // Get the user name and store it to prepend to messages.
+    self.displayName(prompt('Please enter your name if you would like to be identified in the chat feature:', ''));
+    // Set initial focus to message input box.
+    $('#message').focus();
+
     self.Load(data);
-    
 }
 
 

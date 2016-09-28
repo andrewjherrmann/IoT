@@ -21,12 +21,5 @@ namespace IoTChallenge.Controllers
             var results = model.GetRoomInfo();
             return View(results);
         }
-
-        public JsonResult DefconLevel(DefconLevelChange defconLevelChange)
-        {
-            var model = new DefconModel();
-            var result = model.ChangeDefconLevel(defconLevelChange);
-            return new JsonResult() { Data = result };
-        }
     }   
 }
