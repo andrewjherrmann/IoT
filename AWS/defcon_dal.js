@@ -1,25 +1,19 @@
 'use strict';
 
 var AWS = require("aws-sdk");
-
-console.log('Loading function');
-
 const doc = require('dynamodb-doc');
-
 const db = new doc.DynamoDB();
-
 const dbdoc = new AWS.DynamoDB.DocumentClient()
-
+const SNS = new AWS.SNS({ apiVersion: '2010-03-31' });
 
 /**
- * Demonstrates a simple HTTP endpoint using API Gateway. You have full
- * access to the request and response payload, including headers and
- * status code.
- *
- * To scan a DynamoDB table, make a GET request with the TableName as a
- * query string parameter. To put, update, or delete an item, make a POST,
- * PUT, or DELETE request respectively, passing in the payload to the
- * DynamoDB API as a JSON body.
+
+{
+    "serialNumber": "G030JF059105JAGN",
+    "batteryVoltage": "xxmV",
+    "clickType": "SINGLE" | "DOUBLE" | "LONG"
+}
+
  */
  
  function readItem(id, callback){
@@ -33,6 +27,7 @@ const dbdoc = new AWS.DynamoDB.DocumentClient()
  
 function updateRoomStatus(params, newLevel, callback){
     
+    var message = params.Message;
     var params = {
         TableName:params.TableName,
         Key:{
@@ -61,27 +56,75 @@ function updateRoomStatus(params, newLevel, callback){
         if (err){
             console.log('updateRoomStatus Error:', JSON.stringify(err, null, 2));
         }
-        callback(err,{message:"Success", current_level: data.Attributes.current_level});
+        //callback(err,{message:"Success", current_level: data.Attributes.current_level})
+        SNS.publish({
+            Message: message,
+            Subject: "Defcon Changed",
+            TopicArn: "arn:aws:sns:us-west-2:867486598692:defcon_updated",
+        }, function (snsErr, data2){ 
+            if (snsErr){
+                console.log('Update SNS Error:', JSON.stringify(snsErr, null, 2));
+            }
+            callback(err,{message:"Success", current_level: data.Attributes.current_level});
+        });
     });
  }
  
  function isEmpty(obj) {
   return !Object.keys(obj).length > 0;
 }
+
+function postChange(message, callback){
+    const params = {
+            Message: message,
+            Subject: `Defcon Changed`,
+            TopicArn: "arn:aws:sns:us-west-2:867486598692:defcon_updated",
+        };
+        
+    SNS.publish(params, callback);
+}
  
  exports.handler = function(event, context, callback) 
 {
-     console.log('Received event:', JSON.stringify(event, null, 2));
-    console.log(event.id);
+    console.log('Received event:', JSON.stringify(event, null, 2));
+    console.log('Received context:', JSON.stringify(context, null, 2));
+    
+    //const done = (err,res) => doneHandler(err,res,callback);
+    
+
     const done = (err, res) => callback(null, {
         statusCode: err ? '400' : '200',
         body: err ? err.message : res,
         headers: {
             'Content-Type': 'application/json',
         },
-    });
+    });        
+    
+    
     
     var tableName = "defcon";
+    
+    if (!event.hasOwnProperty('operation') && event.hasOwnProperty('serialNumber')){
+        // Rewrite the event
+        console.log('This is a button click');
+        
+        var operation = 'instant_death';
+        if (event.clickType == "SINGLE")
+        {
+            operation = "raise_defcon";
+        }
+        else if (event.clickType == "DOUBLE"){
+            operation = "lower_defcon";
+        }
+        
+        var event = {
+            operation: operation,
+            bodyjson: {
+                room_id: event.serialNumber
+            }
+        }
+        console.log('Rewrite Event:', JSON.stringify(event, null, 2));
+    }
     
     
     switch (event.operation) {
@@ -107,8 +150,11 @@ function updateRoomStatus(params, newLevel, callback){
             }            
             
             dbdoc.get(params, function(err, data) {
+                console.log('instant_death_get:', JSON.stringify(data, null, 2));
                 if (!err && !isEmpty(data)) {
                     params.Item = data.Item;
+                    var message = ":sob: Defcon raised to level INSTANT DEATH in room " + data.Item.name
+                    params.Message = message;
                     var data = updateRoomStatus(params, 1, callback);
                 } 
             });
@@ -123,12 +169,15 @@ function updateRoomStatus(params, newLevel, callback){
             }            
             
             dbdoc.get(params, function(err, data) {
+                console.log('raise_defcon:', JSON.stringify(data, null, 2));
                 if (!err && !isEmpty(data)) {
                     params.Item = data.Item;
                     var new_level = data.Item.current_level;
                     new_level = (new_level > 1)? new_level - 1 : new_level;
-                    var data = updateRoomStatus(params, new_level, callback);
-                } 
+                        var message = "Defcon raised to level " + new_level + " in room " + data.Item.name
+                        params.Message = message;
+                        updateRoomStatus(params, new_level, callback);
+                }
             });
             break;
             
@@ -141,11 +190,14 @@ function updateRoomStatus(params, newLevel, callback){
             }            
             
             dbdoc.get(params, function(err, data) {
+                console.log('lower_defcon_get:', JSON.stringify(data, null, 2));
                 if (!err && !isEmpty(data)) {
                     params.Item = data.Item;
                     var new_level = data.Item.current_level;
                     new_level = (new_level < 5)? new_level + 1 : new_level;
-                    var data = updateRoomStatus(params, new_level, callback);
+                        var message = "Defcon lowered to level " + new_level + " in room " + data.Item.name
+                        params.Message = message;
+                        var data = updateRoomStatus(params, new_level, callback);
                 } 
             });
             break;               
