@@ -10,6 +10,7 @@ function DefconItemModel(data, defcon){
     self.level_last_updated = ko.observable(data.level_last_updated);
     self.level_last_updated_by = ko.observable(data.level_last_updated_by);
     self.level_auto_lower_time = ko.observable(data.level_auto_lower_time);
+    self.nameTitle = ko.observable("Last Updated: " + moment(self.level_last_updated()).format("LLLL"));
 
     self.progress_style = ko.computed(function () {
         switch (self.current_level()) {
@@ -53,6 +54,7 @@ function DefconViewModel(data) {
     self.messages = ko.observableArray();
     self.displayName = ko.observable();
     self.message = ko.observable("");
+
 
     self.Load = function (data) {
         self.offset(data.offset);
