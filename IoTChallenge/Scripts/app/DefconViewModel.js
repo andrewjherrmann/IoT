@@ -77,6 +77,12 @@ function DefconViewModel(data) {
 
     };
 
+    self.defcon.client.loadResults = function (data) {
+        data.items.forEach(function (item) {
+            self.defcon.client.publishStatusToPage(item);
+        })
+    };
+
     self.sendMessage = function () {
         // Call the Send method on the hub.
         self.defcon.server.send(self.displayName(), self.message());

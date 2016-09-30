@@ -27,8 +27,8 @@ namespace IoTChallenge.Hubs
         {
             var model = new DefconModel();
             var result = model.ChangeDefconLevel(new DefconLevelChange() { room_id = room_id, request_type = request_type });
-            result.room_id = room_id;
-            Clients.All.publishStatusToPage(result);
+            //result.room_id = room_id;
+            //Clients.All.publishStatusToPage(result);
         }
 
         //public void Poll()
