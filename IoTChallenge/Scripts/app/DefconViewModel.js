@@ -88,6 +88,10 @@ function DefconViewModel(data) {
 
     self.sendMessage = function () {
         // Call the Send method on the hub.
+        if (!self.displayName()) {
+            // Get the user name and store it to prepend to messages.
+            self.displayName(prompt('Please enter your name if you would like to be identified in the chat feature:', ''));
+        }
         self.defcon.server.send(self.displayName(), self.message());
         self.message("");
         // Clear text box and reset focus for next comment.
@@ -102,11 +106,6 @@ function DefconViewModel(data) {
         var encodedValue = $('<div />').text(value).html();
         return encodedValue;
     }
-
-    // Get the user name and store it to prepend to messages.
-    self.displayName(prompt('Please enter your name if you would like to be identified in the chat feature:', ''));
-    // Set initial focus to message input box.
-    $('#message').focus();
 
     self.Load(data);
 }
