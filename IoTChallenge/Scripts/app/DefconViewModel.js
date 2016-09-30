@@ -74,6 +74,7 @@ function DefconViewModel(data) {
         var match = ko.utils.arrayFirst(self.items(), function (item) {
             if (data.room_id === item.room_id()) {
                 item.current_level(data.current_level);
+                item.level_last_updated(data.level_last_updated);
             }
         });
 
